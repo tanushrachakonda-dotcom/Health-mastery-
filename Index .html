@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Health & Spending Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <button onclick="showTab('home')">Home</button>
+    <button onclick="showTab('gain')">Calories Gained</button>
+    <button onclick="showTab('lost')">Calories Lost</button>
+    <button onclick="showTab('schedule')">Schedule</button>
+    <button onclick="showTab('settings')">Settings</button>
+  </nav>
+
+  <!-- HOME -->
+  <div id="home" class="tab active">
+    <h2>Dashboard</h2>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+      <div>
+        <h3>Calories: Gained vs Lost</h3>
+        <canvas id="calorieChart"></canvas>
+      </div>
+      <div>
+        <h3>Monthly Spending</h3>
+        <canvas id="spendingChart"></canvas>
+      </div>
+    </div>
+
+    <div style="background: rgb(0, 0, 0); padding: 20px; border-radius: 8px; color: white;">
+      <h3>Monthly Savings Goals</h3>
+      <div id="savingsGoals"></div>
+    </div>
+  </div>
+
+  <!-- CALORIES GAINED -->
+  <div id="gain" class="tab">
+    <h2>Calories Gained + Money</h2>
+    <input id="food" placeholder="Food name">
+    <input id="calories" placeholder="Calories">
+    <input id="money" placeholder="Money ($)">
+    <button onclick="addGain()">Add</button>
+
+    <ul id="gainList"></ul>
+  </div>
+
+  <!-- CALORIES LOST -->
+  <div id="lost" class="tab">
+    <h2>Calories Lost</h2>
+    <input id="activity" placeholder="Activity">
+    <input id="burned" placeholder="Calories burned">
+    <button onclick="addLost()">Add</button>
+
+    <ul id="lostList"></ul>
+
+    <p class="tip">
+      Tip: You can track this using Apple Health or fitness apps from the App Store or Play Store.
+    </p>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div id="schedule" class="tab">
+    <h2>Schedule</h2>
+    <input id="event" placeholder="Event">
+    <input type="date" id="date">
+    <button onclick="addEvent()">Add</button>
+
+    <ul id="scheduleList"></ul>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="settings" class="tab">
+    <h2>Settings</h2>
+    <button onclick="toggleDark()">Toggle Dark Mode</button>
+
+    <h3 style="margin-top: 20px;">Monthly Savings Goal</h3>
+    <input id="monthInput" type="month" placeholder="Month">
+    <input id="savingsGoal" type="number" placeholder="Target savings ($)">
+    <button onclick="setSavingsGoal()">Set Goal</button>
+
+    <div id="goalsDisplay" style="margin-top: 20px;"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
