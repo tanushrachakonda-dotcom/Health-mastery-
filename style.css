@@ -1,33 +1,43 @@
+/* Base */
 body {
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   margin: 0;
-  background: white;
-  color: black;
+  background: #f4f4f4;
+  color: #111;
+  transition: 0.3s ease;
 }
 
 /* Dark Mode */
 body.dark {
   background: #121212;
-  color: white;
+  color: #f1f1f1;
 }
 
-/* Navbar */
+/* NAVBAR */
 nav {
   display: flex;
-  gap: 15px;
-  padding: 12px;
-  background: #333;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #222;
+  align-items: center;
 }
 
 nav button {
-  color: rgb(209, 37, 37);
-  background: none;
+  background: #444;
+  color: white;
   border: none;
+  padding: 8px 12px;
   cursor: pointer;
-  font-size: 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: 0.2s;
 }
 
-/* Tabs */
+nav button:hover {
+  background: #666;
+}
+
+/* TABS */
 .tab {
   display: none;
   padding: 20px;
@@ -37,13 +47,43 @@ nav button {
   display: block;
 }
 
-/* Inputs */
+/* INPUTS */
 input {
-  margin: 5px;
-  padding: 6px;
+  margin: 6px 0;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
 }
 
-/* Lists */
+input:focus {
+  border-color: #333;
+}
+
+/* LISTS */
 ul {
   margin-top: 10px;
+  padding-left: 20px;
+}
+
+/* DARK MODE INPUT FIX */
+body.dark input {
+  background: #1e1e1e;
+  color: white;
+  border: 1px solid #444;
+}
+
+/* OPTIONAL: nicer buttons for actions */
+button.action {
+  background: #2d6cdf;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+button.action:hover {
+  background: #1f4fb8;
 }
