@@ -58,6 +58,7 @@
     button.action {
       padding: 8px 12px;
       cursor: pointer;
+      margin: 5px 5px 0 0;
     }
   </style>
 </head>
@@ -101,7 +102,10 @@
   <input id="calories" type="number" placeholder="Calories">
   <input id="money" type="number" placeholder="Cost ($)">
 
+  <br>
+
   <button class="action" onclick="addGain()">Add</button>
+  <button class="action" onclick="resetGain()">Reset Gained</button>
 
   <ul id="gainList"></ul>
 </section>
@@ -113,12 +117,15 @@
   <input id="activity" placeholder="Activity">
   <input id="burned" type="number" placeholder="Calories burned">
 
+  <br>
+
   <button class="action" onclick="addLost()">Add</button>
+  <button class="action" onclick="resetLost()">Reset Lost</button>
 
   <ul id="lostList"></ul>
 
   <p style="color:gray;">
-    Tip: You can track activity using Apple Health or Google Fit.
+    Tip: Track activity using Apple Health or Google Fit.
   </p>
 </section>
 
@@ -129,7 +136,10 @@
   <input id="event" placeholder="Event name">
   <input id="date" type="date">
 
+  <br>
+
   <button class="action" onclick="addEvent()">Add</button>
+  <button class="action" onclick="resetSchedule()">Clear Schedule</button>
 
   <ul id="scheduleList"></ul>
 </section>
@@ -145,9 +155,18 @@
   <input id="monthInput" type="month">
   <input id="savingsGoal" type="number" placeholder="Target ($)">
 
+  <br>
+
   <button class="action" onclick="setSavingsGoal()">Set Goal</button>
 
-  <div id="goalsDisplay"></div>
+  <div id="savingsGoals"></div>
+
+  <hr>
+
+  <h3>Reset Options</h3>
+
+  <button class="action" onclick="resetSavings()">Reset Savings Goals</button>
+  <button class="action" onclick="resetAll()">Reset EVERYTHING</button>
 </section>
 
 <script src="script.js"></script>
