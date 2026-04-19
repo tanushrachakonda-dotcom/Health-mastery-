@@ -1,71 +1,146 @@
-// ===== DATA STORAGE =====
+// ===== DATA =====
 let gainData = [];
 let lostData = [];
 let monthlySpending = {};
-let savingsGoals = [];
+let savingsGoals = {};
 let calorieChart;
 let spendingChart;
 
-// Load from localStorage
-if (localStorage.getItem("gainData")) {
-  gainData = JSON.parse(localStorage.getItem("gainData"));
-  lostData = JSON.parse(localStorage.getItem("lostData"));
-  monthlySpending = JSON.parse(localStorage.getItem("monthlySpending"));
-  savingsGoals = JSON.parse(localStorage.getItem("savingsGoals"));
+// ===== LOAD =====
+function loadData() {
+  gainData = JSON.parse(localStorage.getItem("gainData")) || [];
+  lostData = JSON.parse(localStorage.getItem("lostData")) || [];
+  monthlySpending = JSON.parse(localStorage.getItem("monthlySpending")) || {};
+  savingsGoals = JSON.parse(localStorage.getItem("savingsGoals")) || {};
 }
 
-// ===== TAB SWITCH =====
+// ===== SAVE =====
+function saveData() {
+  localStorage.setItem("gainData", JSON.stringify(gainData));
+  localStorage.setItem("lostData", JSON.stringify(lostData));
+  localStorage.setItem("monthlySpending", JSON.stringify(monthlySpending));
+  localStorage.setItem("savingsGoals", JSON.stringify(savingsGoals));
+}
+
+// ===== TAB =====
 function showTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(tab).classList.add('active');
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById(tab).classList.add("active");
 }
 
-// ===== ADD CALORIES GAINED + MONEY =====
+// ===== DATE =====
+function getMonthKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+
+// ===== ADD GAIN (FULL OBJECT) =====
 function addGain() {
-  let food = document.getElementById("food").value;
-  let calories = Number(document.getElementById("calories").value);
-  let money = Number(document.getElementById("money").value);
+  const food = document.getElementById("food").value.trim();
+  const calories = Number(document.getElementById("calories").value);
+  const money = Number(document.getElementById("money").value);
 
   if (!food || !calories || !money) return;
 
-  gainData.push(calories);
+  gainData.push({ food, calories, money });
 
-  // Track monthly spending
-  let today = new Date();
-  let monthKey = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
+  const monthKey = getMonthKey();
   monthlySpending[monthKey] = (monthlySpending[monthKey] || 0) + money;
 
-  let li = document.createElement("li");
-  li.textContent = `${food} - ${calories} cal - $${money}`;
-  document.getElementById("gainList").appendChild(li);
-
-  updateCharts();
+  clearInputs(["food", "calories", "money"]);
+  updateUI();
+  renderLists();
 }
 
-// ===== ADD CALORIES LOST =====
+// ===== ADD LOST =====
 function addLost() {
-  let activity = document.getElementById("activity").value;
-  let burned = Number(document.getElementById("burned").value);
+  const activity = document.getElementById("activity").value.trim();
+  const burned = Number(document.getElementById("burned").value);
 
   if (!activity || !burned) return;
 
-  lostData.push(burned);
+  lostData.push({ activity, burned });
 
-  let li = document.createElement("li");
-  li.textContent = `${activity} - ${burned} cal burned`;
-  document.getElementById("lostList").appendChild(li);
-
-  updateCharts();
+  clearInputs(["activity", "burned"]);
+  updateUI();
+  renderLists();
 }
 
-// ===== ADD SCHEDULE =====
+// ===== ADD EVENT =====
 function addEvent() {
-  let event = document.getElementById("event").value;
-  let date = document.getElementById("date").value;
+  const event = document.getElementById("event").value.trim();
+  const date = document.getElementById("date").value;
 
-  let li = document.createElement("li");
+  if (!event || !date) return;
+
+  const li = document.createElement("li");
   li.textContent = `${event} on ${date}`;
   document.getElementById("scheduleList").appendChild(li);
+
+  clearInputs(["event", "date"]);
+}
+
+// ===== CLEAR INPUTS =====
+function clearInputs(ids) {
+  ids.forEach(id => document.getElementById(id).value = "");
+}
+
+// ===== RENDER LISTS =====
+function renderLists() {
+  const gainList = document.getElementById("gainList");
+  const lostList = document.getElementById("lostList");
+
+  gainList.innerHTML = "";
+  lostList.innerHTML = "";
+
+  gainData.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = `${item.food} - ${item.calories} cal - $${item.money}`;
+    gainList.appendChild(li);
+  });
+
+  lostData.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = `${item.activity} - ${item.burned} cal burned`;
+    lostList.appendChild(li);
+  });
+}
+
+// ===== RESET FUNCTIONS =====
+function resetGain() {
+  gainData = [];
+  updateUI();
+  renderLists();
+}
+
+function resetLost() {
+  lostData = [];
+  updateUI();
+  renderLists();
+}
+
+function resetSchedule() {
+  document.getElementById("scheduleList").innerHTML = "";
+}
+
+function resetSavings() {
+  savingsGoals = {};
+  updateUI();
+}
+
+function resetAll() {
+  if (!confirm("Reset everything?")) return;
+
+  gainData = [];
+  lostData = [];
+  monthlySpending = {};
+  savingsGoals = {};
+
+  localStorage.clear();
+
+  renderLists();
+  renderSavingsGoals();
+  updateUI();
 }
 
 // ===== DARK MODE =====
@@ -73,124 +148,108 @@ function toggleDark() {
   document.body.classList.toggle("dark");
 }
 
-// ===== CHART HELPERS =====
-function getTotalGained() {
-  return gainData.reduce((a, b) => a + b, 0);
-}
-function getTotalLost() {
-  return lostData.reduce((a, b) => a + b, 0);
+// ===== SUM =====
+function sumCalories(arr) {
+  return arr.reduce((total, item) => total + item.calories, 0);
 }
 
-// ===== INIT CHARTS =====
+function sumLost(arr) {
+  return arr.reduce((total, item) => total + item.burned, 0);
+}
+
+// ===== CHARTS =====
 function initCharts() {
-  const ctxCalorie = document.getElementById('calorieChart');
-  calorieChart = new Chart(ctxCalorie, {
-    type: 'bar',
+  calorieChart = new Chart(document.getElementById("calorieChart"), {
+    type: "bar",
     data: {
-      labels: ['Calories Gained', 'Calories Lost'],
+      labels: ["Gained", "Lost"],
       datasets: [{
-        data: [getTotalGained(), getTotalLost()],
-        backgroundColor: ['rgba(220, 38, 38, 0.8)', 'rgba(37, 99, 235, 0.8)'],
-        borderColor: ['rgba(220, 38, 38, 1)', 'rgba(37, 99, 235, 1)'],
-        borderWidth: 2
+        data: [sumCalories(gainData), sumLost(lostData)]
       }]
     },
     options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'Calories' } }
-      }
+      plugins: { legend: { display: false } }
     }
   });
 
   updateSpendingChart();
-  displaySavingsGoals();
+  renderSavingsGoals();
 }
 
-// ===== UPDATE CHARTS =====
-function updateCharts() {
-  // Bar chart
+// ===== UPDATE UI =====
+function updateUI() {
   if (calorieChart) {
-    calorieChart.data.datasets[0].data = [getTotalGained(), getTotalLost()];
+    calorieChart.data.datasets[0].data = [
+      sumCalories(gainData),
+      sumLost(lostData)
+    ];
     calorieChart.update();
   }
-  // Pie chart
-  updateSpendingChart();
-  // Savings
-  displaySavingsGoals();
 
-  // Save data to localStorage
-  localStorage.setItem("gainData", JSON.stringify(gainData));
-  localStorage.setItem("lostData", JSON.stringify(lostData));
-  localStorage.setItem("monthlySpending", JSON.stringify(monthlySpending));
-  localStorage.setItem("savingsGoals", JSON.stringify(savingsGoals));
+  updateSpendingChart();
+  renderSavingsGoals();
+  saveData();
 }
 
-// ===== SPENDING PIE CHART =====
+// ===== SPENDING CHART =====
 function updateSpendingChart() {
-  const ctxSpending = document.getElementById('spendingChart');
-  if (!ctxSpending) return;
+  const ctx = document.getElementById("spendingChart");
+  if (!ctx) return;
 
-  let months = Object.keys(monthlySpending).sort();
-  let amounts = months.map(m => monthlySpending[m]);
+  const months = Object.keys(monthlySpending);
+  const values = months.map(m => monthlySpending[m]);
 
   if (spendingChart) spendingChart.destroy();
 
-  spendingChart = new Chart(ctxSpending, {
-    type: 'pie',
+  spendingChart = new Chart(ctx, {
+    type: "pie",
     data: {
       labels: months,
-      datasets: [{
-        data: amounts,
-        backgroundColor: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#a29bfe', '#fd79a8', '#00cec9']
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: 'bottom' },
-        tooltip: { callbacks: { label: ctx => `${ctx.label}: $${ctx.raw.toFixed(2)}` } }
-      }
+      datasets: [{ data: values }]
     }
   });
 }
 
-// ===== SAVINGS GOALS =====
+// ===== SAVINGS =====
 function setSavingsGoal() {
-  let month = document.getElementById('monthInput').value;
-  let goal = Number(document.getElementById('savingsGoal').value);
-  if (!month || !goal) { alert('Enter month + goal'); return; }
+  const month = document.getElementById("monthInput").value;
+  const goal = Number(document.getElementById("savingsGoal").value);
+
+  if (!month || !goal) return;
 
   savingsGoals[month] = goal;
-  displaySavingsGoals();
-  document.getElementById('monthInput').value = '';
-  document.getElementById('savingsGoal').value = '';
+
+  clearInputs(["monthInput", "savingsGoal"]);
+  updateUI();
 }
 
-function displaySavingsGoals() {
-  let html = '';
-  for (let month in savingsGoals) {
-    let spent = monthlySpending[month] || 0;
-    let goal = savingsGoals[month];
-    let remaining = Math.max(0, goal - spent);
-    let percent = Math.min(100, (remaining / goal * 100).toFixed(1));
-    let statusColor = remaining > 0 ? '#4caf50' : '#f44336';
-    let statusText = remaining > 0 ? 'On Track' : 'Over Budget';
+// ===== RENDER SAVINGS =====
+function renderSavingsGoals() {
+  const container = document.getElementById("savingsGoals");
 
-    html += `<div class="savings-goal-box">
-      <strong>${month}</strong><br>
-      <span style="color: inherit;">Goal: <strong>$${goal}</strong> | Spent: <strong>$${spent.toFixed(2)}</strong> | Remaining: <strong style="color: ${statusColor};">$${remaining.toFixed(2)}</strong></span>
-      <div style="margin-top: 8px; color: ${statusColor}; font-weight: bold;">${statusText} - ${percent}%</div>
-      <div class="savings-progress-bar">
-        <div style="background: ${statusColor}; width: ${percent}%; height: 100%; border-radius: 4px; transition: width 0.3s ease;"></div>
+  let html = "";
+
+  for (let month in savingsGoals) {
+    const spent = monthlySpending[month] || 0;
+    const goal = savingsGoals[month];
+    const remaining = goal - spent;
+
+    html += `
+      <div class="card">
+        <h4>${month}</h4>
+        <p>Goal: $${goal}</p>
+        <p>Spent: $${spent}</p>
+        <p>Remaining: $${remaining}</p>
       </div>
-    </div>`;
+    `;
   }
 
-  document.getElementById('savingsGoals').innerHTML = html || '<p style="color: #666;">No savings goals set</p>';
-  document.getElementById('goalsDisplay').innerHTML = html || '<p style="color: #666;">No savings goals set</p>';
+  container.innerHTML = html || "<p>No goals yet</p>";
 }
 
 // ===== INIT =====
-window.addEventListener('load', initCharts);
+window.addEventListener("load", () => {
+  loadData();
+  initCharts();
+  renderLists();
+});
